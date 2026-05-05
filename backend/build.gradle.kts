@@ -1,6 +1,8 @@
 plugins {
 	java
-	id("org.springframework.boot") version "4.0.3"
+	kotlin("jvm") version "2.2.21"
+	kotlin("plugin.spring") version "2.2.21"
+	id("org.springframework.boot") version "4.0.6"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -10,7 +12,7 @@ description = "rest-api"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
+		languageVersion = JavaLanguageVersion.of(24)
 	}
 }
 
@@ -40,6 +42,11 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
+
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("tools.jackson.module:jackson-module-kotlin")
+
+
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
@@ -47,6 +54,24 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+kotlin {
+	compilerOptions {
+		freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+	}
+}
+
+allOpen {
+	annotation("jakarta.persistence.Entity")
+	annotation("jakarta.persistence.MappedSuperclass")
+	annotation("jakarta.persistence.Embeddable")
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.withType<Jar> {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE // 중복 발생 시 첫 번째 파일만 포함하고 나머지는 제외
+	// 또는
+	// duplicatesStrategy = DuplicatesStrategy.INCLUDE // 나중에 발견된 파일로 덮어씀
 }
